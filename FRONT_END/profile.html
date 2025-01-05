@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - Ticketer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <style>
+    body {
+      background-color: #1a1a1a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #ffffffcc;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar .navbar-brand {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .profile-header img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-header h2 {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #00bfff;
+    }
+
+    .profile-header p {
+      color: #aaa;
+      margin-bottom: 2rem;
+    }
+
+    .profile-details {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: #2b2b2b;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-details h3 {
+      border-bottom: 1px solid #444;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      color: #00bfff;
+    }
+
+    .profile-details .detail {
+      margin-bottom: 1rem;
+    }
+
+    .profile-details .detail span {
+      font-weight: bold;
+      color: #aaa;
+    }
+
+    .form-control {
+      background-color: #2b2b2b;
+      color: #fff;
+      border: 1px solid #444;
+    }
+
+    .btn-primary {
+      background-color: #00bfff;
+      border-color: #00bfff;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background-color: #00a5dd;
+      border-color: #00a5dd;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">
+        <i class="bi bi-ticket-fill"></i> Ticketer
+      </a>
+      <div class="d-flex ms-auto">
+        <a href="index.html" class="btn btn-outline-dark me-2">Home</a>
+        <button id="signOut" class="btn btn-dark">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <img id="profilePicture" src="https://cdn.openart.ai/published/F2egCM4S1mYriuOOmqYE/OaMQaXnd_eZPE_1024.webp" alt="User Avatar" />
+    <h2 id="userName">John Doe</h2>
+    <p id="userEmail">john.doe@example.com</p>
+  </div>
+
+  <!-- Profile Details -->
+  <div class="profile-details">
+    <h3>Profile Details</h3>
+    <form id="profileForm">
+      <div class="detail">
+        <label for="editName" class="form-label"><span>Full Name:</span></label>
+        <input type="text" id="editName" class="form-control" value="John Doe" readonly />
+      </div>
+      <div class="detail">
+        <label for="editEmail" class="form-label"><span>Email:</span></label>
+        <input type="email" id="editEmail" class="form-control" value="john.doe@example.com" readonly />
+      </div>
+      <div class="detail">
+        <label for="editRole" class="form-label"><span>Role:</span></label>
+        <input type="text" id="editRole" class="form-control" value="Admin" readonly />
+      </div>
+      <button type="button" id="editProfile" class="btn btn-primary w-100 mt-3">Edit Profile</button>
+      <button type="submit" id="saveProfile" class="btn btn-success w-100 mt-3" style="display: none;">Save Changes</button>
+      <button type="button" id="cancelEdit" class="btn btn-secondary w-100 mt-3" style="display: none;">Cancel</button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const editButton = document.getElementById('editProfile');
+      const saveButton = document.getElementById('saveProfile');
+      const cancelButton = document.getElementById('cancelEdit');
+      const inputs = document.querySelectorAll('#profileForm input');
+
+      // Enable editing
+      editButton.addEventListener('click', () => {
+        inputs.forEach(input => input.removeAttribute('readonly'));
+        editButton.style.display = 'none';
+        saveButton.style.display = 'block';
+        cancelButton.style.display = 'block';
+      });
+
+      // Save changes
+      document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updatedUser = {
+          name: document.getElementById('editName').value,
+          email: document.getElementById('editEmail').value,
+          role: document.getElementById('editRole').value,
+        };
+
+        try {
+          const response = await fetch('/api/update-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedUser),
+          });
+
+          if (response.ok) {
+            alert('Profile updated successfully!');
+            inputs.forEach(input => input.setAttribute('readonly', true));
+            editButton.style.display = 'block';
+            saveButton.style.display = 'none';
+            cancelButton.style.display = 'none';
+          } else {
+            throw new Error('Failed to update profile');
+          }
+        } catch (error) {
+          alert('Error updating profile. Please try again.');
+          console.error(error);
+        }
+      });
+
+      // Cancel editing
+      cancelButton.addEventListener('click', () => {
+        inputs.forEach(input => input.setAttribute('readonly', true));
+        editButton.style.display = 'block';
+        saveButton.style.display = 'none';
+        cancelButton.style.display = 'none';
+      });
+
+      // Sign out logic
+      document.getElementById('signOut').addEventListener('click', async () => {
+        try {
+          const response = await fetch('/api/logout', { method: 'POST' });
+          if (response.ok) {
+            window.location.href = 'signin.html';
+          } else {
+            alert('Failed to sign out. Please try again.');
+          }
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
